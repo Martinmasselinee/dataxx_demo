@@ -2257,6 +2257,57 @@ document.addEventListener('DOMContentLoaded', () => {
             </td>
             <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">${preferredShop}, ${secondaryShop}</td>
           </tr>
+          <tr class="border-b border-gray-200">
+            <td class="py-4 whitespace-nowrap text-[16px] font-normal text-gray-900 w-1/3 text-left">
+              <span class="flex items-center">
+                <i class="fas fa-clock text-gray-500 mr-3"></i>
+                Temps sur site avant achat
+              </span>
+            </td>
+            <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">${5 + Math.floor(fan.id % 15)} minutes</td>
+          </tr>
+          <tr class="border-b border-gray-200">
+            <td class="py-4 whitespace-nowrap text-[16px] font-normal text-gray-900 w-1/3 text-left">
+              <span class="flex items-center">
+                <i class="fas fa-shopping-cart text-gray-500 mr-3"></i>
+                Articles dans le panier en attente <i class="fas fa-eye text-gray-500 ml-2 cursor-pointer" id="view-current-cart"></i>
+              </span>
+            </td>
+            <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">${1 + Math.floor(fan.id % 4)} articles</td>
+          </tr>
+          <tr class="border-b border-gray-200">
+            <td class="py-4 whitespace-nowrap text-[16px] font-normal text-gray-900 w-1/3 text-left">
+              <span class="flex items-center">
+                <i class="fas fa-calendar-alt text-gray-500 mr-3"></i>
+                Période d'achat principale <i class="fas fa-chart-bar text-gray-500 ml-2 cursor-pointer" id="view-purchase-periods"></i>
+              </span>
+            </td>
+            <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">${['Hiver', 'Printemps', 'Été', 'Automne'][fan.id % 4]}</td>
+          </tr>
+          <tr class="border-b border-gray-200">
+            <td class="py-4 whitespace-nowrap text-[16px] font-normal text-gray-900 w-1/3 text-left">
+              <span class="flex items-center">
+                <i class="fas fa-map-marker-alt text-gray-500 mr-3"></i>
+                Distance boutique physique
+              </span>
+            </td>
+            <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">${3 + Math.floor(fan.id % 20)} km</td>
+          </tr>
+          <tr class="border-b border-gray-200">
+            <td class="py-4 whitespace-nowrap text-[16px] font-normal text-gray-900 w-1/3 text-left">
+              <span class="flex items-center">
+                <i class="fas fa-route text-gray-500 mr-3"></i>
+                Accès à la boutique
+              </span>
+            </td>
+            <td class="py-4 whitespace-nowrap text-[16px] font-bold text-gray-900 text-right">
+              ${fan.id % 3 === 0 ? 
+                `Voiture: ${10 + Math.floor(fan.id % 15)} minutes` : 
+                (fan.id % 3 === 1 ? 
+                  `Transports: ${15 + Math.floor(fan.id % 20)} minutes, ${1 + Math.floor(fan.id % 3)} changements` : 
+                  `À pied: ${5 + Math.floor(fan.id % 10)} minutes`)}
+            </td>
+          </tr>
         </tbody>
       </table>
     `;
@@ -2274,6 +2325,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 viewBasketsButton.addEventListener('click', () => {
                     const cartProducts = generateCurrentCartProducts();
                     showDetailsPopup('Détail du panier en cours', cartProducts, ['Name', 'Price', 'Quantity', 'Total', 'AddedDate']);
+                });
+            }
+            
+            const viewCurrentCartButton = document.getElementById('view-current-cart');
+            if (viewCurrentCartButton) {
+                viewCurrentCartButton.addEventListener('click', () => {
+                    const cartProducts = generateCurrentCartProducts();
+                    showDetailsPopup('Articles dans le panier en attente', cartProducts, ['Name', 'Price', 'Quantity', 'Total', 'AddedDate']);
+                });
+            }
+            
+            const viewPurchasePeriodsButton = document.getElementById('view-purchase-periods');
+            if (viewPurchasePeriodsButton) {
+                viewPurchasePeriodsButton.addEventListener('click', () => {
+                    // Generate purchase period data with a GitHub-like distribution
+                    const periodData = [];
+                    const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+                    const currentMonth = new Date().getMonth();
+                    
+                    for (let i = 0; i < 12; i++) {
+                        const monthIndex = (currentMonth - i + 12) % 12;
+                        const purchases = i === (fan.id % 12) ? 5 + Math.floor(fan.id % 10) : 
+                                         (i === ((fan.id + 3) % 12) ? 3 + Math.floor(fan.id % 7) : 
+                                         Math.floor(fan.id % 5));
+                        
+                        periodData.push({
+                            month: months[monthIndex],
+                            purchases: purchases,
+                            value: `${purchases * avgItemPrice} €`
+                        });
+                    }
+                    
+                    showDetailsPopup('Répartition des achats par période', periodData, ['Month', 'Purchases', 'Value']);
                 });
             }
         }, 100);
@@ -3034,12 +3118,478 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update text content
                 segmentNameEl.textContent = segment.name;
                 
-                // Apply color classes
+                // Apply color classes with smaller size and less bold font
                 segmentNameEl.className = `text-xl font-medium px-3 py-1.5 rounded-full bg-${color}-100 text-${color}-700`;
             }
             
             // Show the segment profile flow
             segmentProfileFlow.classList.add('active');
+            
+            // Generate segment insight for display in the content area
+            const segmentProfileContent = document.getElementById('segment-profile-content');
+            if (segmentProfileContent) {
+                // Generate segment insights data
+                // Calculate fan data
+                const percentOfTotal = ((segment.fanCount / segments.reduce((sum, s) => sum + s.fanCount, 0)) * 100).toFixed(1);
+                const averageSegmentSize = Math.round(segments.reduce((sum, s) => sum + s.fanCount, 0) / segments.length);
+                const comparisonToAverage = Math.round((segment.fanCount / averageSegmentSize) * 100 - 100);
+                
+                // Profile status text based on percentage
+                let profileStatusText = '';
+                let profileStatusClass = '';
+                if (segment.profilePercentage < 40) {
+                    profileStatusText = 'faible';
+                    profileStatusClass = 'bg-orange-100 text-orange-800 border-orange-200';
+                }
+                else if (segment.profilePercentage < 60) {
+                    profileStatusText = 'moyen';
+                    profileStatusClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                }
+                else if (segment.profilePercentage < 80) {
+                    profileStatusText = 'bon';
+                    profileStatusClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                }
+                else {
+                    profileStatusText = 'excellent';
+                    profileStatusClass = 'bg-green-100 text-green-800 border-green-200';
+                }
+                
+                // Generate random statistics for the segment
+                const malePercentage = Math.floor(Math.random() * 40) + 30; // 30-70%
+                const femalePercentage = 100 - malePercentage;
+                const avgAge = Math.floor(Math.random() * 20) + 25; // 25-45
+                const engagementRate = (Math.random() * 5 + 2).toFixed(1); // 2.0-7.0%
+                const clickThroughRate = (Math.random() * 2 + 0.5).toFixed(1); // 0.5-2.5%
+                const purchaseRate = (Math.random() * 1 + 0.2).toFixed(1); // 0.2-1.2%
+                // Ticketing and matchday habits
+                const avgTicketsPerSeason = Math.floor(Math.random() * 8) + 3; // 3-10 matches
+                const avgTicketPrice = Math.floor(Math.random() * 40) + 25; // 25-65€
+                const preferredStadiumZones = ['Tribune Paris', 'Tribune Borelli', 'Tribune Boulogne', 'Tribune Auteuil'][Math.floor(Math.random() * 4)];
+                const arrivalTime = Math.floor(Math.random() * 30) + 15; // 15-45 minutes before match
+                const oppositionTeamsAttendance = ['OL', 'Monaco', 'Lille', 'Marseille', 'Nantes'][Math.floor(Math.random() * 5)];
+                // Merchandising habits
+                const merchPurchaseFrequency = Math.floor(Math.random() * 3) + 1; // 1-3 items per season
+                const avgItemPrice = Math.floor(Math.random() * 30) + 20; // 20-50€
+                const preferredMerchItems = ['Écharpe', 'T-shirt', 'Maillot', 'Accessoires'][Math.floor(Math.random() * 4)];
+                const totalSpentOnMerch = Math.floor(Math.random() * 150) + 50; // 50-200€
+                const preferredStore = ['Boutique Parc des Princes', 'Boutique Forum des Halles', 'Boutique en ligne'][Math.floor(Math.random() * 3)];
+                // Last update date
+                const lastUpdate = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR');
+                
+                // Generate segment description - use the same text as in showSegmentInsight
+                const segmentDescription = `<p>Ce segment contient <strong>${segment.fanCount.toLocaleString()}</strong> fans, ce qui représente <strong>${percentOfTotal}%</strong> de votre base de fans totale. Il est <strong>${comparisonToAverage >= 0 ? `${comparisonToAverage}% plus grand` : `${Math.abs(comparisonToAverage)}% plus petit`}</strong> que la taille moyenne de vos segments. Le pourcentage de profils à jour dans ce segment est de <strong>${segment.profilePercentage}%</strong>, ce qui est considéré comme <strong>${profileStatusText}</strong>. La dernière mise à jour des profils a été effectuée le <strong>${lastUpdate}</strong>. La répartition démographique de ce segment montre <strong>${malePercentage}% d'hommes</strong> et <strong>${femalePercentage}% de femmes</strong>, avec un âge moyen de <strong>${avgAge} ans</strong>. En matière de billetterie, les fans de ce segment assistent en moyenne à <strong>${avgTicketsPerSeason} matches par saison</strong>, avec un prix moyen de <strong>${avgTicketPrice}€ par billet</strong>, préférant majoritairement la zone <strong>${preferredStadiumZones}</strong>. Ils arrivent typiquement <strong>${arrivalTime} minutes</strong> avant le début du match et sont particulièrement présents lors des rencontres contre <strong>${oppositionTeamsAttendance}</strong>. Concernant leur comportement d'achat de merchandising, ils acquièrent environ <strong>${merchPurchaseFrequency} articles par saison</strong> à un prix moyen de <strong>${avgItemPrice}€</strong>, avec une préférence pour les <strong>${preferredMerchItems}</strong>. Leur dépense annuelle moyenne en merchandising est de <strong>${totalSpentOnMerch}€</strong>, principalement dans la <strong>${preferredStore}</strong>. Les métriques d'engagement numériques pour ce segment sont les suivantes: un taux d'engagement de <strong>${engagementRate}%</strong>, un taux de clics de <strong>${clickThroughRate}%</strong>, et un taux d'achat de <strong>${purchaseRate}%</strong>.</p>`;
+                
+                // Generate recommendations - use the same text as in showSegmentInsight
+                const recommendations = `<h4 class="text-lg font-semibold mt-5 mb-2">Recommandations</h4>
+                <p>Créez des messages ciblés qui attirent l'audience ${malePercentage > femalePercentage ? 'majoritairement masculine' : 'majoritairement féminine'} de ce segment. Concentrez-vous sur des campagnes pour la tranche d'âge moyenne de ${avgAge} ans. ${segment.profilePercentage < 60 ? 'Améliorez le pourcentage de profils à jour pour obtenir de meilleures données démographiques.' : 'Maintenez le bon niveau de profils à jour pour garantir des données précises.'} ${parseFloat(engagementRate) > 4 ? 'Utilisez le taux d\'engagement élevé de ce segment pour les lancements de nouveaux produits.' : 'Travaillez à améliorer le taux d\'engagement de ce segment avec un contenu plus personnalisé.'} Proposez des offres spéciales pour les matches contre ${oppositionTeamsAttendance} qui attirent particulièrement ce segment. Développez des promotions sur les ${preferredMerchItems}, leur catégorie d'articles préférée, et envisagez des campagnes ciblées dans la ${preferredStore} où ces fans effectuent principalement leurs achats.</p>`;
+                
+                // Add the content to the segment profile content area
+                segmentProfileContent.innerHTML = `
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <div class="p-6 bg-white shadow-md rounded-lg h-full">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-magic text-indigo-500 mr-2"></i>
+                                    Description du segment
+                                </h2>
+                                <button id="regenerate-segment-insight" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded text-sm flex items-center space-x-1">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Régénérer</span>
+                                </button>
+                            </div>
+                            
+                            <div class="text-left mt-7 overflow-y-auto" style="max-height: 280px;">
+                                ${segmentDescription}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <div class="p-6 bg-white shadow-md rounded-lg h-full">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    Recommandations
+                                </h2>
+                            </div>
+                            
+                            <div class="text-left mt-7 overflow-y-auto" style="max-height: 280px;">
+                                ${recommendations}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                
+                // Add event listener for regenerate button
+                setTimeout(() => {
+                    const regenerateButton = document.getElementById('regenerate-segment-insight');
+                    if (regenerateButton) {
+                        regenerateButton.addEventListener('click', () => {
+                            // Show loading state
+                            regenerateButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Génération...</span>`;
+                            regenerateButton.disabled = true;
+                            
+                            // Simulate regeneration delay
+                            setTimeout(() => {
+                                alert('Regénération des insights pour ce segment...');
+                                
+                                // Restore button state
+                                regenerateButton.innerHTML = `<i class="fas fa-sync-alt"></i><span>Régénérer</span>`;
+                                regenerateButton.disabled = false;
+                            }, 1200);
+                        });
+                    }
+                }, 100);
+                
+                // Generate fans table for this segment
+                // Get a random subset of fans based on segment.fanCount
+                const numFansToShow = Math.min(segment.fanCount, fans.length);
+                const segmentFans = [];
+                const fanIndices = new Set();
+                
+                // Ensure we get a random selection without duplicates
+                while (fanIndices.size < numFansToShow) {
+                    const randomIndex = Math.floor(Math.random() * fans.length);
+                    fanIndices.add(randomIndex);
+                }
+                
+                // Create fans array for this segment
+                Array.from(fanIndices).forEach(index => {
+                    segmentFans.push(fans[index]);
+                });
+                
+                // Variables for fan table pagination
+                let segmentFansRowsPerPage = 10;
+                let segmentFansCurrentPage = 1;
+                
+                // Helper function to add pagination buttons
+                const addSegmentFansPaginationButton = (pageNum, container) => {
+                    const isActive = pageNum === segmentFansCurrentPage;
+                    const button = document.createElement('button');
+                    button.className = `relative inline-flex items-center px-4 py-2 border ${isActive ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-300 bg-white text-gray-700'} text-sm font-medium`;
+                    button.textContent = pageNum;
+                    
+                    button.addEventListener('click', () => {
+                        segmentFansCurrentPage = pageNum;
+                        renderSegmentFansTable();
+                    });
+                    
+                    container.appendChild(button);
+                };
+                
+                // Helper function to add ellipsis
+                const addSegmentFansEllipsis = (container) => {
+                    const span = document.createElement('span');
+                    span.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                    span.innerHTML = '&hellip;';
+                    container.appendChild(span);
+                };
+                
+                // Setup event listeners for the fans table
+                const setupSegmentFansEventListeners = () => {
+                    // Add event listeners to the "Voir" buttons
+                    const viewButtons = document.querySelectorAll('.view-fan-btn');
+                    viewButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const fanId = e.currentTarget.getAttribute('data-id');
+                            const fanIdNum = parseInt(fanId || '0');
+                            const selectedFan = fans.find(fan => fan.id === fanIdNum);
+                            if (selectedFan) {
+                                showFanProfile(selectedFan);
+                            }
+                        });
+                    });
+                    
+                    // Add event listeners to the "Generate" insight buttons
+                    const generateButtons = document.querySelectorAll('#segment-fans-table-body button[data-insight-id]');
+                    generateButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const fanId = e.currentTarget.getAttribute('data-insight-id');
+                            const fanIdNum = parseInt(fanId || '0');
+                            const selectedFan = fans.find(fan => fan.id === fanIdNum);
+                            if (!selectedFan) return;
+                            
+                            // If already generated, just show the modal
+                            if (button.classList.contains('generated')) {
+                                showAIInsight(selectedFan);
+                                return;
+                            }
+                            
+                            // Show loading state
+                            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Generating...</span>`;
+                            button.disabled = true;
+                            button.classList.add('opacity-75');
+                            
+                            // Simulate AI generation delay 
+                            setTimeout(() => {
+                                // Reset button state but mark as generated
+                                button.innerHTML = `<i class="fas fa-magic"></i><span>Generate</span>`;
+                                button.classList.remove('opacity-75');
+                                button.disabled = false;
+                                // Mark as generated but keep the original colors and hover effects
+                                button.classList.add('generated');
+                                // Show AI insight in modal
+                                showAIInsight(selectedFan);
+                            }, 1500);
+                        });
+                    });
+                    
+                    // Add event listeners for next/prev buttons
+                    const prevPageBtn = document.getElementById('segment-fans-prev-page');
+                    const nextPageBtn = document.getElementById('segment-fans-next-page');
+                    
+                    if (prevPageBtn) {
+                        prevPageBtn.addEventListener('click', () => {
+                            if (segmentFansCurrentPage > 1) {
+                                segmentFansCurrentPage--;
+                                renderSegmentFansTable();
+                            }
+                        });
+                    }
+                    
+                    if (nextPageBtn) {
+                        nextPageBtn.addEventListener('click', () => {
+                            const totalPages = Math.ceil(segmentFans.length / segmentFansRowsPerPage);
+                            if (segmentFansCurrentPage < totalPages) {
+                                segmentFansCurrentPage++;
+                                renderSegmentFansTable();
+                            }
+                        });
+                    }
+                    
+                    // Add event listener for rows per page selector
+                    const rowsSelector = document.getElementById('segment-fans-rows-per-page');
+                    if (rowsSelector) {
+                        rowsSelector.addEventListener('change', (e) => {
+                            segmentFansRowsPerPage = parseInt(e.target.value);
+                            segmentFansCurrentPage = 1; // Reset to first page
+                            renderSegmentFansTable();
+                        });
+                    }
+                };
+                
+                // Function to render segment fans table with pagination
+                const renderSegmentFansTable = () => {
+                    // Calculate pagination
+                    const totalPages = Math.ceil(segmentFans.length / segmentFansRowsPerPage);
+                    const startIndex = (segmentFansCurrentPage - 1) * segmentFansRowsPerPage;
+                    const endIndex = Math.min(startIndex + segmentFansRowsPerPage, segmentFans.length);
+                    const currentFansPage = segmentFans.slice(startIndex, endIndex);
+                    
+                    // Update showing text
+                    const showingText = document.getElementById('segment-fans-showing-text');
+                    if (showingText) {
+                        showingText.textContent = `Showing ${startIndex + 1}-${endIndex} of ${segmentFans.length} fans`;
+                    }
+                    
+                    // Update table body
+                    const tableBody = document.getElementById('segment-fans-table-body');
+                    if (tableBody) {
+                        let tableHTML = '';
+                        
+                        // Generate rows for current page
+                        currentFansPage.forEach(fan => {
+                            // Determine proximity class
+                            let proximityClass = '';
+                            if (fan.proximityRating < 30) {
+                                proximityClass = 'bg-red-100 text-red-800';
+                            } else if (fan.proximityRating < 55) {
+                                proximityClass = 'bg-yellow-100 text-yellow-800';
+                            } else if (fan.proximityRating < 85) {
+                                proximityClass = 'bg-blue-100 text-blue-800';
+                            } else {
+                                proximityClass = 'bg-green-100 text-green-800';
+                            }
+                            
+                            // Determine gender class
+                            const genderClass = fan.gender === 'male' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800';
+                            
+                            // Format date
+                            const formattedDate = `${fan.createdDate.getDate().toString().padStart(2, '0')}/${(fan.createdDate.getMonth() + 1).toString().padStart(2, '0')}/${fan.createdDate.getFullYear()}`;
+                            
+                            // Check if insight is generated
+                            const isGenerated = generatedSegmentsInsights.includes(fan.id) ? 'generated' : '';
+                            
+                            tableHTML += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap w-1/7">
+                                    <div class="flex items-center">
+                                        <div class="w-full">
+                                            <div class="font-medium text-gray-900 text-base truncate max-w-[150px]">
+                                                ${fan.firstName} ${fan.lastName.toUpperCase()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center w-1/7">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${genderClass}">
+                                        ${fan.gender}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center w-1/7">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${proximityClass}">
+                                        ${fan.proximityRating}%
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap w-1/7">
+                                    <div class="text-gray-500 text-base">
+                                        ${formattedDate}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-base w-1/7">
+                                    <div class="font-medium text-gray-900 text-base">
+                                        ${fan.totalValue.toFixed(2)} €
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center w-1/7">
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded text-sm flex items-center space-x-1 mx-auto ${isGenerated}" data-insight-id="${fan.id}">
+                                        <i class="fas fa-magic"></i>
+                                        <span>Generate</span>
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-1/7">
+                                    <div class="flex justify-end w-full">
+                                        <button class="bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded text-sm flex items-center space-x-1 view-fan-btn" data-id="${fan.id}">
+                                            <i class="fas fa-eye"></i>
+                                            <span>Voir</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        });
+                        
+                        tableBody.innerHTML = tableHTML;
+                    }
+                    
+                    // Update pagination
+                    const paginationNumbers = document.getElementById('segment-fans-pagination-numbers');
+                    if (paginationNumbers) {
+                        paginationNumbers.innerHTML = '';
+                        
+                        // Add pagination buttons
+                        if (totalPages <= 5) {
+                            // Show all pages if 5 or fewer
+                            for (let i = 1; i <= totalPages; i++) {
+                                addSegmentFansPaginationButton(i, paginationNumbers);
+                            }
+                        } else {
+                            // Show ellipsis for many pages
+                            addSegmentFansPaginationButton(1, paginationNumbers);
+                            
+                            if (segmentFansCurrentPage > 2) {
+                                addSegmentFansEllipsis(paginationNumbers);
+                            }
+                            
+                            // Show pages around current page
+                            for (let i = Math.max(2, segmentFansCurrentPage - 1); i <= Math.min(totalPages - 1, segmentFansCurrentPage + 1); i++) {
+                                addSegmentFansPaginationButton(i, paginationNumbers);
+                            }
+                            
+                            if (segmentFansCurrentPage < totalPages - 1) {
+                                addSegmentFansEllipsis(paginationNumbers);
+                            }
+                            
+                            // Always show last page
+                            if (totalPages > 1) {
+                                addSegmentFansPaginationButton(totalPages, paginationNumbers);
+                            }
+                        }
+                    }
+                    
+                    // Set up event listeners for buttons
+                    setupSegmentFansEventListeners();
+                };
+                
+                // Append a fans table below the component grid
+                segmentProfileContent.innerHTML += `
+                <div class="mt-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <!-- Table Header with controls -->
+                        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                            <div class="text-xl font-semibold">Fans in this Segment (${segmentFans.length})</div>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center">
+                                    <label for="segment-fans-rows-per-page" class="mr-2 text-sm text-gray-600">Rows:</label>
+                                    <select id="segment-fans-rows-per-page" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Table Content -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            Name
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            Gender
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            Proximity
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            Created
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            Value
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            AI Insight
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
+                                            <div class="flex justify-end w-full">
+                                                Actions
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="segment-fans-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Table rows will be dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div class="px-4 py-3 border-t border-gray-200 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <button id="segment-fans-prev-page" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Previous
+                                    </button>
+                                    <button id="segment-fans-next-page" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Next
+                                    </button>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p id="segment-fans-showing-text" class="text-sm text-gray-700">
+                                            Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">20</span> results
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <div id="segment-fans-pagination-numbers" class="flex space-x-1">
+                                                <!-- Pagination numbers will be dynamically populated -->
+                                            </div>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-[200px]"></div>`;
+                
+                // Render the initial table
+                renderSegmentFansTable();
+            }
             
             // Setup back button handler
             const backButton = document.getElementById('back-to-segments-btn');
@@ -3248,32 +3798,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    // ... existing code ...
-    
-    // Initialize tooltips for mobile devices
-    const infoIcons = document.querySelectorAll('[data-tooltip]');
-    infoIcons.forEach(icon => {
-        // For touch devices
-        icon.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            // Hide any existing tooltips
-            document.querySelectorAll('.tooltip-active').forEach(el => {
-                el.classList.remove('tooltip-active');
-            });
-            // Add active class to show this tooltip
-            icon.classList.add('tooltip-active');
-        });
-        
-        // Hide tooltip when clicking elsewhere
-        document.addEventListener('touchstart', (e) => {
-            if (!e.target.hasAttribute('data-tooltip')) {
-                document.querySelectorAll('.tooltip-active').forEach(el => {
-                    el.classList.remove('tooltip-active');
-                });
-            }
-        });
-    });
-    
     // ... existing code ...
 });
 //# sourceMappingURL=client.js.map

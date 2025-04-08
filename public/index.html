@@ -159,48 +159,6 @@
       height: 1px; /* Force minimal height to prevent expansion */
       vertical-align: middle;
     }
-    
-    /* Tooltip styles */
-    [data-tooltip] {
-      position: relative;
-    }
-    
-    [data-tooltip]:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: -30px;
-      min-width: 150px;
-      padding: 5px 10px;
-      border-radius: 4px;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      font-size: 12px;
-      font-weight: normal;
-      text-transform: none;
-      white-space: normal;
-      z-index: 100;
-    }
-    
-    /* For touch devices */
-    .tooltip-active::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: -30px;
-      min-width: 150px;
-      padding: 5px 10px;
-      border-radius: 4px;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      font-size: 12px;
-      font-weight: normal;
-      text-transform: none;
-      white-space: normal;
-      z-index: 100;
-    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -315,28 +273,22 @@
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Name
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Name of the segment"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Fan Count
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Total number of fans in this segment"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Profiles à jour
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Percentage of profiles that are up to date in this segment"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Created
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Date when this segment was created"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   AI Insight
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Generate AI-powered insights for this segment"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   <div class="flex justify-end w-full">
                     Actions
-                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="View segment details"></i>
                   </div>
                 </th>
               </tr>
@@ -428,32 +380,25 @@
               <tr>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Name
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Fan's full name"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Gender
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Fan's gender"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Proximity
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="How close the fan is to the club (superfan, regular, occasional)"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Created
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Date when the fan profile was created"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   Total Value
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Total monetary value contributed by this fan"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   AI Insight
-                  <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="Generate AI-powered insights for this fan"></i>
                 </th>
                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/7">
                   <div class="flex justify-end w-full">
                     Actions
-                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-help" data-tooltip="View fan details"></i>
                   </div>
                 </th>
               </tr>
